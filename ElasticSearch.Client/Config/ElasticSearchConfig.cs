@@ -13,46 +13,11 @@ namespace ElasticSearch.Client.Config
 	{
 		#region static method
 
-		private static readonly string ConfigName;
-
-		private static ElasticSearchConfig _instance;
-
-		static ElasticSearchConfig()
-		{
-			#region get configFile
-
-			ConfigName = "Config/ElasticSearch.config";
-			string configFileValue = ConfigurationManager.AppSettings["ElasticSearchConfigFile"];
-
-			if (!string.IsNullOrEmpty(configFileValue))
-				ConfigName = configFileValue;
-
-			#endregion
-
-			#region load Config
-
-		    try
-		    {
-		        _instance = LoadConfig<ElasticSearchConfig>(ConfigName);
-		    }
-		    catch (System.Exception ex)
-		    {
-		        Console.WriteLine(ex);
-		    }
-
-			#endregion
-		}
+		private static ElasticSearchConfig _instance = CreateElasticSearchConfig();
 
 		public static ElasticSearchConfig Instance
 		{
-			get
-			{
-				if (_instance == null)
-				{
-					_instance = new ElasticSearchConfig();
-				}
-				return _instance;
-			}
+			get { return _instance; }
 		}
 
 		public static event EventHandler ConfigChanged;
@@ -75,6 +40,17 @@ namespace ElasticSearch.Client.Config
 
 		[ReflectorCollection("ConnectionPool", InstanceType = typeof(ConnectionPoolConfig), Required = false)]
 		public ConnectionPoolConfig ConnectionPool { set; get; }
+
+        private static ElasticSearchConfig CreateElasticSearchConfig()
+		{
+			string configName = "Config/ElasticSearch.config";
+			string configFileValue = ConfigurationManager.AppSettings["ElasticSearchConfigFile"];
+
+			if (!string.IsNullOrEmpty(configFileValue))
+                configName = configFileValue;
+
+            return LoadConfig<ElasticSearchConfig>(configName);
+		}
 
 		private static T LoadConfig<T>(string xmlPath) where T : class
 		{
